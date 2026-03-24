@@ -1,7 +1,13 @@
-class MyFirstMod extends PolyMod {
-    init() {
-        console.log("MyFirstMod loaded!");
+import { PolyMod } from "https://cdn.polymodloader.com/cb/PolyTrackMods/PolyModLoader/0.6.0/PolyTypes.js";
+
+class PolyQOL extends PolyMod {
+    init = (pml) => {
+        this.pml = pml;
+    }
+
+    onGameLoad = () => {
+        // your mod logic here
     }
 }
 
-new MyFirstMod();
+export let polyMod = new PolyQOL();
