@@ -1,4 +1,4 @@
-import { PolyMod } from "https://cdn.polymodloader.com/cb/PolyTrackMods/PolyModLoader/0.6.0/PolyTypes.js";
+import { PolyMod, MixinType } from "https://cdn.polymodloader.com/cb/PolyTrackMods/PolyModLoader/0.6.0/PolyTypes.js";
 
 class PolyQOL extends PolyMod {
     init = (pml) => {
@@ -6,49 +6,57 @@ class PolyQOL extends PolyMod {
         this.attempts = 0;
         this.finishes = 0;
         this.overlay = null;
+        
+        // Hook into finish detection
+        pml.registerClassMixin(
+            "Car.prototype",
+            "setCarState",
+            {
+                type: MixinType.INSERT,
+                token: "if(null!=(0,l.gn)(this,ie,\"f\").finishFrames&&null==n.finishFrames){",
+                func: `
+                    const mod = ActivePolyModLoader.getMod("polyqol");
+                    if (mod) {
+                        mod.finishes++;
+                        mod.updateOverlay();
+                    }
+                `
+            }
+        );
+
+        // Hook into reset detection
+        pml.registerClassMixin(
+            "Car.prototype",
+            "setCarState",
+            {
+                type: MixinType.INSERT,
+                token: "for(const e of(0,l.gn)(this,de,\"f\"))e()}",
+                func: `
+                    const mod = ActivePolyModLoader.getMod("polyqol");
+                    if (mod) {
+                        mod.attempts++;
+                        mod.updateOverlay();
+                    }
+                `
+            }
+        );
     }
 
     onGameLoad = () => {
-        // Get the car object when game loads
-        const car = this.pml.car; // or however the mod API exposes the car
-        
-        if (car) {
-            this.trackRun(car);
-        }
-    }
-
-    trackRun = (car) => {
-        // Increment attempts when a new run starts
-        car.addResetCallback(() => {
-            this.attempts++;
-            this.updateOverlay();
-        });
-
-        // Increment finishes when run completes
-        car.addFinishCallback((finishedCar) => {
-            this.finishes++;
-            this.updateOverlay();
-        });
-
-        // Initial state
-        this.attempts++;
+        this.createOverlay();
         this.updateOverlay();
     }
 
     updateOverlay = () => {
-        if (!this.overlay) {
-            this.createOverlay();
-        }
-
+        if (!this.overlay) return;
         const finishRate = this.attempts > 0 
             ? ((this.finishes / this.attempts) * 100).toFixed(1) 
-            : 0;
-
+            : "0";
         this.overlay.innerHTML = `
-            <div style="font-weight: bold; font-size: 16px;">Session Stats</div>
+            <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">Session Stats</div>
             <div>Attempts: ${this.attempts}</div>
             <div>Finishes: ${this.finishes}</div>
-            <div>Success Rate: ${finishRate}%</div>
+            <div style="margin-top: 8px; border-top: 1px solid #666; padding-top: 8px;">Success: ${finishRate}%</div>
         `;
     }
 
@@ -58,13 +66,15 @@ class PolyQOL extends PolyMod {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             color: #fff;
             padding: 15px;
             border-radius: 8px;
             font-family: monospace;
+            font-size: 14px;
             z-index: 9999;
-            min-width: 150px;
+            min-width: 180px;
+            border: 2px solid #4a9eff;
         `;
         document.body.appendChild(this.overlay);
     }
