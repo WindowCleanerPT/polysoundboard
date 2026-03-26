@@ -1,11 +1,14 @@
+```js
 import { PolyMod, MixinType } from "https://cdn.polymodloader.com/cb/PolyTrackMods/PolyModLoader/0.6.0/PolyTypes.js";
 class PolyQOL extends PolyMod {
     init = (pml) => {
         this.pml = pml;
         this.attempts = 0;
         this.overlay = null;
+
+        this.createOverlay();
+        this.updateOverlay();
         
-        // Hook into reset - INSERT inside reset input block
         pml.registerGlobalMixin(
             {
                 type: MixinType.INSERT,
@@ -14,10 +17,6 @@ class PolyQOL extends PolyMod {
             }
         );
     };
-    onGameLoad = () => {
-        this.createOverlay();
-        this.updateOverlay();
-    }
     createOverlay = () => {
         this.overlay = document.createElement('div');
         this.overlay.style.cssText = `
@@ -45,3 +44,4 @@ class PolyQOL extends PolyMod {
     }
 }
 export let polyMod = new PolyQOL();
+```
