@@ -7,13 +7,13 @@ class PolyQOL extends PolyMod {
         this.finishes = 0;
         this.overlay = null;
         
-        // Hook into finish detection
+        // Hook into finish callback execution - INSERT after finish callbacks fire
         pml.registerClassMixin(
             "Car.prototype",
             "setCarState",
             {
                 type: MixinType.INSERT,
-                token: "if(null!=(0,l.gn)(this,ie,\"f\").finishFrames&&null==n.finishFrames){",
+                token: "for(const e of(0,l.gn)(this,pe,\"f\"))e(this)}",
                 func: `
                     const mod = ActivePolyModLoader.getMod("polyqol");
                     if (mod) {
@@ -24,7 +24,7 @@ class PolyQOL extends PolyMod {
             }
         );
 
-        // Hook into reset detection
+        // Hook into reset callback execution - INSERT after reset callbacks fire
         pml.registerClassMixin(
             "Car.prototype",
             "setCarState",
@@ -40,24 +40,11 @@ class PolyQOL extends PolyMod {
                 `
             }
         );
-    }
+    };
 
     onGameLoad = () => {
         this.createOverlay();
         this.updateOverlay();
-    }
-
-    updateOverlay = () => {
-        if (!this.overlay) return;
-        const finishRate = this.attempts > 0 
-            ? ((this.finishes / this.attempts) * 100).toFixed(1) 
-            : "0";
-        this.overlay.innerHTML = `
-            <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">Session Stats</div>
-            <div>Attempts: ${this.attempts}</div>
-            <div>Finishes: ${this.finishes}</div>
-            <div style="margin-top: 8px; border-top: 1px solid #666; padding-top: 8px;">Success: ${finishRate}%</div>
-        `;
     }
 
     createOverlay = () => {
@@ -77,6 +64,19 @@ class PolyQOL extends PolyMod {
             border: 2px solid #4a9eff;
         `;
         document.body.appendChild(this.overlay);
+    }
+
+    updateOverlay = () => {
+        if (!this.overlay) return;
+        const finishRate = this.attempts > 0 
+            ? ((this.finishes / this.attempts) * 100).toFixed(1) 
+            : "0";
+        this.overlay.innerHTML = `
+            <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">Session Stats</div>
+            <div>Attempts: ${this.attempts}</div>
+            <div>Finishes: ${this.finishes}</div>
+            <div style="margin-top: 8px; border-top: 1px solid #666; padding-top: 8px;">Success: ${finishRate}%</div>
+        `;
     }
 }
 
