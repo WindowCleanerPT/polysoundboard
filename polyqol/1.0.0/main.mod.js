@@ -3,23 +3,8 @@ class PolyQOL extends PolyMod {
     init = (pml) => {
         this.pml = pml;
         this.attempts = 0;
-        this.finishes = 0;
         this.overlay = null;
         
-        // Hook into finish callback execution
-        pml.registerGlobalMixin(
-            {
-                type: MixinType.INSERT,
-                token: "for(const e of(0,l.gn)(this,pe,\"f\"))e(this)}",
-                func: `
-                    const mod = ActivePolyModLoader.getMod("polyqol");
-                    if (mod) {
-                        mod.finishes++;
-                        mod.updateOverlay();
-                    }
-                `,
-            }
-        );
         // Hook into reset - INSERT inside reset input block
         pml.registerGlobalMixin(
             {
@@ -53,14 +38,9 @@ class PolyQOL extends PolyMod {
     }
     updateOverlay = () => {
         if (!this.overlay) return;
-        const finishRate = this.attempts > 0 
-            ? ((this.finishes / this.attempts) * 100).toFixed(1) 
-            : "0";
         this.overlay.innerHTML = `
             <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">Session Stats</div>
             <div>Attempts: ${this.attempts}</div>
-            <div>Finishes: ${this.finishes}</div>
-            <div style="margin-top: 8px; border-top: 1px solid #666; padding-top: 8px;">Success: ${finishRate}%</div>
         `;
     }
 }
