@@ -6,10 +6,8 @@ class PolyQOL extends PolyMod {
         this.finishes = 0;
         this.overlay = null;
         
-        // Hook into finish callback execution - INSERT after finish callbacks fire
+        // Hook into finish callback execution
         pml.registerGlobalMixin(
-            "createCar(e, t, n, i, s, l) {",
-            "setCarState",
             {
                 type: MixinType.INSERT,
                 token: "for(const e of(0,l.gn)(this,pe,\"f\"))e(this)}",
