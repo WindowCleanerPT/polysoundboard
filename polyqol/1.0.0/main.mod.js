@@ -4,9 +4,6 @@ class PolyQOL extends PolyMod {
         this.pml = pml;
         this.attempts = 0;
         this.overlay = null;
-
-        this.createOverlay();
-        this.updateOverlay();
         
         pml.registerGlobalMixin(
             {
@@ -16,6 +13,10 @@ class PolyQOL extends PolyMod {
             }
         );
     };
+    onGameLoad = () => {
+        this.createOverlay();
+        this.updateOverlay();
+    }
     createOverlay = () => {
         this.overlay = document.createElement('div');
         this.overlay.style.cssText = `
