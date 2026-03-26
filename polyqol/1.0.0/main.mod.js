@@ -1,5 +1,4 @@
 import { PolyMod, MixinType } from "https://cdn.polymodloader.com/cb/PolyTrackMods/PolyModLoader/0.6.0/PolyTypes.js";
-
 class PolyQOL extends PolyMod {
     init = (pml) => {
         this.pml = pml;
@@ -8,8 +7,8 @@ class PolyQOL extends PolyMod {
         this.overlay = null;
         
         // Hook into finish callback execution - INSERT after finish callbacks fire
-        pml.registerClassMixin(
-            "Car.prototype",
+        pml.registerGlobalMixin(
+            "createCar(e, t, n, i, s, l) {",
             "setCarState",
             {
                 type: MixinType.INSERT,
@@ -20,33 +19,22 @@ class PolyQOL extends PolyMod {
                         mod.finishes++;
                         mod.updateOverlay();
                     }
-                `
+                `,
             }
         );
-
-        // Hook into reset callback execution - INSERT after reset callbacks fire
-        pml.registerClassMixin(
-            "Car.prototype",
-            "setCarState",
+        // Hook into reset - INSERT inside reset input block
+        pml.registerGlobalMixin(
             {
                 type: MixinType.INSERT,
-                token: "for(const e of(0,l.gn)(this,de,\"f\"))e()}",
-                func: `
-                    const mod = ActivePolyModLoader.getMod("polyqol");
-                    if (mod) {
-                        mod.attempts++;
-                        mod.updateOverlay();
-                    }
-                `
+                token: `(e.repeat || (0, C.GG)(this, ff, 0, "f"),`,
+                func: `ActivePolyModLoader.getMod("polyqol").attempts++,ActivePolyModLoader.getMod("polyqol").updateOverlay(),`,
             }
         );
     };
-
     onGameLoad = () => {
         this.createOverlay();
         this.updateOverlay();
     }
-
     createOverlay = () => {
         this.overlay = document.createElement('div');
         this.overlay.style.cssText = `
@@ -65,7 +53,6 @@ class PolyQOL extends PolyMod {
         `;
         document.body.appendChild(this.overlay);
     }
-
     updateOverlay = () => {
         if (!this.overlay) return;
         const finishRate = this.attempts > 0 
@@ -79,5 +66,4 @@ class PolyQOL extends PolyMod {
         `;
     }
 }
-
 export let polyMod = new PolyQOL();
