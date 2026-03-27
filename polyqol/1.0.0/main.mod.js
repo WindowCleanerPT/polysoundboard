@@ -1,23 +1,35 @@
 import { PolyMod, MixinType } from "https://cdn.polymodloader.com/cb/PolyTrackMods/PolyModLoader/0.6.0/PolyTypes.js";
+
 class PolyQOL extends PolyMod {
     init = (pml) => {
         this.pml = pml;
         this.attempts = 0;
         this.overlay = null;
-        
-        pml.registerGlobalMixin(
-            {
-                type: MixinType.INSERT,
-                token: `(e.repeat || (0, C.GG)(this, ff, 0, "f"),`,
-                func: `console.log("attempt fired"),ActivePolyModLoader.getMod("polyqol").attempts++,ActivePolyModLoader.getMod("polyqol").updateOverlay(),`,
-            }
-        );
+
+        // 🔥 Hook into ACTUAL reset function (Qa)
+        pml.registerGlobalMixin({
+            type: MixinType.INSERT,
+            token: `(0, C.gn)(this, _r, "m", Qa).call(this)),`,
+            func: `
+                console.log("attempt fired");
+                const mod = ActivePolyModLoader.getMod("polyqol");
+                if (mod) {
+                    mod.attempts++;
+                    mod.updateOverlay();
+                }
+            `,
+        });
     };
+
     onGameLoad = () => {
         this.createOverlay();
         this.updateOverlay();
-    }
+    };
+
     createOverlay = () => {
+        // prevent duplicate overlays
+        if (this.overlay) return;
+
         this.overlay = document.createElement('div');
         this.overlay.style.cssText = `
             position: fixed;
@@ -34,13 +46,16 @@ class PolyQOL extends PolyMod {
             border: 2px solid #4a9eff;
         `;
         document.body.appendChild(this.overlay);
-    }
+    };
+
     updateOverlay = () => {
         if (!this.overlay) return;
+
         this.overlay.innerHTML = `
             <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">Session Stats</div>
             <div>Attempts: ${this.attempts}</div>
         `;
-    }
+    };
 }
+
 export let polyMod = new PolyQOL();
